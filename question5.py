@@ -76,8 +76,7 @@ def read_file():
     if file.mode == "r":
         for line in file.readlines():
             coordinates = line.split()
-            point = Point(float(coordinates[0]), float(coordinates[1]))
-            points.append(point)
+            points.append(Point(float(coordinates[0]), float(coordinates[1])))
 
         file.close()
     else:
@@ -124,6 +123,8 @@ def calculate_distortion(clusters):
 def output_data(clusters):
     file = open("q5_output.csv", "w")
     if file.mode == "w":
+        file.write("X-Coordinate,Y-Coordinate,Cluster\n")
+
         letter = 'A'
         for cluster in clusters:
             for point in cluster.points:
