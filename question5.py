@@ -68,33 +68,6 @@ class ClusterArray:
         for cluster in self.clusters:
             cluster.points = []
 
-    def calculate_distortion(self):
-        distortion = 0
-        for cluster in self.clusters:
-            cluster_sum = 0
-            for point in cluster.points:
-                d = (point.coordinates[0] - cluster.coordinates[0], point.coordinates[1] - cluster.coordinates[1])
-                cluster_sum += d[0] ** 2 + d[1] ** 2
-            distortion += cluster_sum
-
-        return distortion
-
-    def output_data(self):
-        file = open("q5_output.csv", "w")
-        if file.mode == "w":
-            letter = 'A'
-            for cluster in self.clusters:
-                for point in cluster.points:
-                    file.write(str(point.coordinates[0]) + "," + str(point.coordinates[1]) + "," + letter + "\n")
-                letter = chr(ord(letter) + 1)
-
-            file.close()
-        else:
-            file.close()
-
-            print("An error occurred while writing to q5_output.csv. Shutting Down.")
-            exit(0)
-
 
 def read_file():
     points = []
@@ -109,8 +82,7 @@ def read_file():
         file.close()
     else:
         file.close()
-
-        print("An error occurred while opening q5 values.txt. Shutting Down.")
+        print("An error occurred while opening q5_values.txt\n Shutting Down.")
         exit(0)
 
     return points
@@ -137,6 +109,35 @@ def calculate_cluster_points(points):
     ]
 
 
+def calculate_distortion(clusters):
+    distortion = 0
+    for cluster in clusters:
+        cluster_sum = 0
+        for point in cluster.points:
+            d = (point.coordinates[0] - cluster.coordinates[0], point.coordinates[1] - cluster.coordinates[1])
+            cluster_sum += d[0] ** 2 + d[1] ** 2
+        distortion += cluster_sum
+
+    return distortion
+
+
+def output_data(clusters):
+    file = open("q5_output.csv", "w")
+    if file.mode == "w":
+        letter = 'A'
+        for cluster in clusters:
+            for point in cluster.points:
+                file.write(str(point.coordinates[0]) + "," + str(point.coordinates[1]) + "," + letter + "\n")
+            letter = chr(ord(letter) + 1)
+
+        file.close()
+        print("Cluster Results output to q5_output.csv")
+    else:
+        file.close()
+        print("An error occurred while writing to q5_output.csv\n Shutting Down.")
+        exit(0)
+
+
 def main():
     clusters = ClusterArray()
     points = read_file()
@@ -156,8 +157,8 @@ def main():
         for cluster in clusters:
             cluster.recalculate()
 
-    print(clusters.calculate_distortion())
-    clusters.output_data()
+    print("Calculated Distortion: {0}".format(calculate_distortion(clusters), 0))
+    output_data(clusters)
 
 
 if __name__ == "__main__":
