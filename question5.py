@@ -44,7 +44,6 @@ class Cluster:
 
 class ClusterArray:
     def __init__(self):
-        self.i = 0
         self.clusters = []
 
     def __eq__(self, other):
@@ -69,6 +68,33 @@ class ClusterArray:
         for cluster in self.clusters:
             cluster.points = []
 
+    def calculate_distortion(self):
+        distortion = 0
+        for cluster in self.clusters:
+            cluster_sum = 0
+            for point in cluster.points:
+                d = (point.coordinates[0] - cluster.coordinates[0], point.coordinates[1] - cluster.coordinates[1])
+                cluster_sum += d[0] ** 2 + d[1] ** 2
+            distortion += cluster_sum
+
+        return distortion
+
+    def output_data(self):
+        file = open("q5_output.csv", "w")
+        if file.mode == "w":
+            letter = 'A'
+            for cluster in self.clusters:
+                for point in cluster.points:
+                    file.write(str(point.coordinates[0]) + "," + str(point.coordinates[1]) + "," + letter + "\n")
+                letter = chr(ord(letter) + 1)
+
+            file.close()
+        else:
+            file.close()
+
+            print("An error occurred while writing to q5_output.csv. Shutting Down.")
+            exit(0)
+
 
 def read_file():
     points = []
@@ -90,28 +116,48 @@ def read_file():
     return points
 
 
+def calculate_cluster_points(points):
+    sort_x = []
+    sort_y = []
+
+    for point in points:
+        sort_x.append(point.coordinates[0])
+        sort_y.append(point.coordinates[1])
+
+    sort_x.sort()
+    sort_y.sort()
+
+    mid = round(len(points) / 2)
+    quart = round(mid / 2)
+
+    return [
+        (sort_x[mid - quart], sort_y[mid - quart]),
+        (sort_x[mid], sort_y[mid]),
+        (sort_x[mid + quart], sort_y[mid + quart])
+    ]
+
 
 def main():
     clusters = ClusterArray()
     points = read_file()
 
-    for _ in range(3):
-        clusters.add_cluster(Cluster(0.0, 0.0))
+    for point in calculate_cluster_points(points):
+        clusters.add_cluster(Cluster(point[0], point[1]))
 
     old_clusters = None
-    new_clusters = clusters
-    while old_clusters != new_clusters:
-        old_clusters = deepcopy(new_clusters)
-        new_clusters.empty_clusters()
+    while old_clusters != clusters:
+        old_clusters = deepcopy(clusters)
+        clusters.empty_clusters()
 
         for point in points:
-            nearest_cluster = point.find_cluster(new_clusters)
+            nearest_cluster = point.find_cluster(clusters)
             nearest_cluster.add_point(point)
 
-        for cluster in new_clusters:
+        for cluster in clusters:
             cluster.recalculate()
 
-
+    print(clusters.calculate_distortion())
+    clusters.output_data()
 
 
 if __name__ == "__main__":
