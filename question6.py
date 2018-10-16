@@ -6,8 +6,7 @@ class Point:
     def __init__(self, x, y):
         self.coordinates = (x, y)
         self.links = []
-        self.label = -1
-        self.link_check = False
+        self.cluster = None
 
     def __eq__(self, other):
         try:
@@ -23,19 +22,19 @@ class Point:
         self.links.append(point)
         point.links.append(self)
 
-    def label_point(self, value):
-        self.label = value
-        for link in self.links:
-            if link.label < 0:
-                link.label_point(value)
 
-    def is_linked(self, point):
-        self.link_check = True
-        for link in self.links:
-            if link == point:
-                return True
-            elif not link.link_check:
-                return link.is_linked(point)
+class Cluster:
+    def __init__(self, init_point):
+        self.points = []
+        self.points.append(init_point)
+        self.label = ''
+
+        init_point.cluster = self
+
+    def merge(self, other):
+        for point in other.points:
+            self.points.append(point)
+            point.cluster = self
 
 
 def read_file():
@@ -82,7 +81,7 @@ def output_data(points):
     if file.mode == "w":
         file.write("X-Coordinate,Y-Coordinate,Cluster\n")
         for point in points:
-            file.write("{},{},{}\n".format(point.coordinates[0], point.coordinates[1], chr(65 + point.label)))
+            file.write("{},{},{}\n".format(point.coordinates[0], point.coordinates[1], point.cluster.label))
 
         file.close()
         print("Results output to q6_output.csv")
@@ -94,24 +93,27 @@ def output_data(points):
 
 def main():
     points = read_file()
+    clusters = []
 
-    num_clusters = len(points)
-    while num_clusters > 2:
+    for point in points:
+        clusters.append(Cluster(point))
+
+    while len(clusters) > 2:
         shortest_pair = find_shortest(points)
-
-        if not shortest_pair[0].is_linked(shortest_pair[1]):
-            num_clusters -= 1
-        for point in points:
-            point.link_check = False
-
         shortest_pair[0].add_link(shortest_pair[1])
 
+        if shortest_pair[0].cluster != shortest_pair[1].cluster:
+            index = -1
+            for i in range(len(clusters)):
+                if clusters[i] == shortest_pair[1].cluster:
+                    index = i
+                    break
 
-    val = 0
-    for point in points:
-        if point.label < 0:
-            point.label_point(val)
-            val += 1
+            shortest_pair[0].cluster.merge(shortest_pair[1].cluster)
+            del clusters[index]
+
+    for i in range(len(clusters)):
+        clusters[i].label = chr(65 + i)
 
     output_data(points)
 
