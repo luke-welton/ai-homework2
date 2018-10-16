@@ -128,7 +128,8 @@ def output_data(clusters):
         letter = 'A'
         for cluster in clusters:
             for point in cluster.points:
-                file.write(str(point.coordinates[0]) + "," + str(point.coordinates[1]) + "," + letter + "\n")
+                file.write("{},{},{}\n".format(point.coordinates[0], point.coordinates[1], letter))
+
             letter = chr(ord(letter) + 1)
 
         file.close()
@@ -158,7 +159,7 @@ def main():
         for cluster in clusters:
             cluster.recalculate()
 
-    print("Calculated Distortion: {0}".format(calculate_distortion(clusters), 0))
+    print("Calculated Distortion: {}".format(calculate_distortion(clusters)))
     output_data(clusters)
 
 
