@@ -40,7 +40,6 @@ class Cluster:
         y /= len(self.points)
 
         self.coordinates = (x, y)
-        self.points = []
 
 
 class ClusterArray:
@@ -66,6 +65,10 @@ class ClusterArray:
     def add_cluster(self, cluster):
         self.clusters.append(cluster)
 
+    def empty_clusters(self):
+        for cluster in self.clusters:
+            cluster.points = []
+
 
 def read_file():
     points = []
@@ -87,6 +90,7 @@ def read_file():
     return points
 
 
+
 def main():
     clusters = ClusterArray()
     points = read_file()
@@ -98,6 +102,7 @@ def main():
     new_clusters = clusters
     while old_clusters != new_clusters:
         old_clusters = deepcopy(new_clusters)
+        new_clusters.empty_clusters()
 
         for point in points:
             nearest_cluster = point.find_cluster(new_clusters)
@@ -105,6 +110,8 @@ def main():
 
         for cluster in new_clusters:
             cluster.recalculate()
+
+
 
 
 if __name__ == "__main__":
